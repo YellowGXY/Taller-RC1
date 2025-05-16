@@ -10,3 +10,5 @@ void leerEnteroNoNegativo(char *mensaje, int *valor);
 void leerFlotantePositivo(char *mensaje, float *valor);
 void leerCadena(char *mensaje, char *cadena, int max);
 void leerCaracter(char *mensaje, char *caracter);
+void recalcularTiemposProductos(int *productosFTiempo, int (*tiemposPiezas)[MAX_PIEZAS], int totalProductos);
+void mostrarTiempo(int tiempo);

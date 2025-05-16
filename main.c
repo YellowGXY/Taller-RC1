@@ -4,14 +4,13 @@
 
 int main() {
     char productos[MAX_PRODUCTO][MAX_NOMBRE] = {"Celulares", "Laptops", "Tablets", "Audifonos Inalambricos", "Smartwatches"};
-    int productosFTiempo[MAX_PRODUCTO] = {30, 60, 45, 20, 25};
 
     char piezasProductos[MAX_PRODUCTO][MAX_PIEZAS][MAX_NOMBRE] = {
-        {"Pantalla", "Bateria", "Carcasa", "Procesador", "Camara"},
-        {"Pantalla", "Teclado", "Bateria", "Placa Base", "Ventilador"},
-        {"Pantalla", "Bateria", "Procesador", "Carcasa", "Puerto USB-C"},
-        {"Auri Izq", "Auri Der", "Bateria", "Bluetooth", "Microfono"},
-        {"Pantalla", "Bateria", "Correa", "Sensor", "Procesador"}
+        {"C1-Screen", "C1-Bateria", "C1-Carcasa", "C1-Procesador", "C1-Camara"},
+        {"L1-Pantalla", "L1-Teclado", "L1-Bateria", "L1-Placa Base", "L1-Ventilador"},
+        {"T1-Pantalla", "T1-Bateria", "T1-Procesador", "T1-Carcasa", "T1-Puerto USB-C"},
+        {"A1-Auri Izq", "A1-Auri Der", "A1-Bateria", "A1-Bluetooth", "A1-Microfono"},
+        {"S1-Pantalla", "S1-Bateria", "S1-Correa", "S1-Sensor", "S1-Procesador"}
     };
 
     int tiemposPiezas[MAX_PRODUCTO][MAX_PIEZAS] = {
@@ -39,7 +38,10 @@ int main() {
     };
 
     int totalProductos = 5;
+    int stockProductos[MAX_PRODUCTO] = {0, 0, 0, 0, 0};
+    int stockFProductos[MAX_PRODUCTO] = {0, 0, 0, 0, 0};
     int totalPiezas[MAX_PRODUCTO] = {5, 5, 5, 5, 5};
+    int productosFTiempo[MAX_PRODUCTO] = {35, 42, 32, 15, 21};
     int opcion;
 
     do {
@@ -51,6 +53,7 @@ int main() {
         printf("4. Mostrar productos\n");
         printf("5. Analizar produccion\n");
         printf("6. Agregar stock de piezas\n");
+        printf("7. Ver stock de productos\n");
         printf("0. Salir\n");
         printf("====================================\n");
 
@@ -102,6 +105,8 @@ int main() {
                     }
                 } while (!nombreValido);
 
+                leerEnteroNoNegativo("Ingrese el stock actual del producto: ", &stockFProductos[totalProductos]);
+            
                 int piezas;
                 leerEnteroPositivo("Cuantas piezas desea registrar para el producto? (10 maximo): ", &piezas);
                 printf("Se registraran %d piezas.\n", piezas);
@@ -129,7 +134,7 @@ int main() {
                         break;
                     }
                 }
-                productosFTiempo[totalProductos] = tiempoTotal;  
+                recalcularTiemposProductos(productosFTiempo, tiemposPiezas, totalProductos + 1);
                 printf("Producto registrado exitosamente.\n");
                 
                 char respuesta;
@@ -160,19 +165,22 @@ int main() {
                     int producto;
                     leerEnteroNoNegativo("Seleccione producto a editar (0 para salir): ", &producto);
 
-                    if (producto == 0 || producto > totalProductos){
+                    if (producto == 0 || producto > totalProductos) {
                         salirEdicion = 1;
                         break;
                     }
                     producto--;
+
                     printf("Producto seleccionado: %s\n", productos[producto]);
+                    printf("Stock actual de unidades terminadas: %d\n", stockProductos[producto]);
                     printf("Tiempo de fabricacion promedio: %d minutos\n", productosFTiempo[producto]);
+
                     printf("+----------+-------------------------+---------+-------------------------+\n");
                     printf("| Cantidad | Nombre                  |  Stock  |  Tiempo de Instalacion  |\n");
                     printf("+----------+-------------------------+---------+-------------------------+\n");
                     for (int j = 0; j < MAX_PIEZAS; j++) {
-                        if (strlen(piezasProductos[producto][j]) != 0){ 
-                            printf("| %8d | %-23s | %6d | %22d |\n",
+                        if (strlen(piezasProductos[producto][j]) != 0) {
+                            printf("| %8d | %-23s | %-7d | %19d min |\n",
                                 piezasNecesarias[producto][j],
                                 piezasProductos[producto][j],
                                 stockPiezas[producto][j],
@@ -180,19 +188,23 @@ int main() {
                             );
                         }
                     }
-                    printf("+----------+--------------------------+---------+-------------------------+\n");
+                    printf("+----------+-------------------------+---------+-------------------------+\n");
+
                     printf("=====================================\n");
                     printf("Opciones de edicion:\n");
-                    printf("1. Cambiar nombre\n");
+                    printf("1. Cambiar nombre del producto\n");
                     printf("2. Editar/Agregar piezas\n");
                     printf("3. Cambiar cantidad de piezas necesarias por unidad\n");
+                    printf("4. Cambiar stock del producto\n");
+                    printf("5. Eliminar una pieza del producto\n");
                     printf("0. Cancelar\n");
                     printf("=====================================\n");
+
                     int ed;
                     leerEnteroNoNegativo("Seleccione opcion: ", &ed);
                     if (ed == 0) {
                         printf("Edicion cancelada.\n");
-                        continue;
+                        break;
                     }
 
                     if (ed == 1) {
@@ -217,35 +229,34 @@ int main() {
                             if (strlen(piezasProductos[producto][j]) != 0) {
                                 printf("%d. %s\n", j + 1, piezasProductos[producto][j]);
                             } else {
-                                char dis[MAX_NOMBRE] = "--Espacio Disponible--";
-                                printf("%d. %s\n", j + 1, dis);
+                                printf("%d. --Espacio Disponible--\n", j + 1);
                             }
                         }
                         int pieza;
                         leerEnteroNoNegativo("Numero de pieza (0 para cancelar): ", &pieza);
                         if (pieza == 0 || pieza > MAX_PIEZAS) {
                             printf("Edicion de pieza cancelada.\n");
-                            continue;
+                            break;
                         }
                         pieza--;
                         printf("Pieza seleccionada: %s\n", piezasProductos[producto][pieza]);
                         printf("Opciones de edicion para la pieza:\n");
                         printf("1. Cambiar nombre\n");
                         printf("2. Cambiar tiempo de instalacion\n");
-                        printf("3. Cambiar Piezas necesarias por unidad\n");
+                        printf("3. Cambiar cantidad necesaria por unidad\n");
                         printf("4. Cambiar TODO\n");
                         printf("0. Cancelar\n");
+
                         int opPieza;
                         do {
                             leerEnteroNoNegativo("Seleccione opcion: ", &opPieza);
-                            if (opPieza < 0 || opPieza > 4) {
-                                printf("Opcion invalida. Intente nuevamente.\n");
-                            }
                         } while (opPieza < 0 || opPieza > 4);
+
                         if (opPieza == 0) {
                             printf("Edicion de pieza cancelada.\n");
-                            continue;
+                            break;
                         }
+
                         if (opPieza == 1) {
                             leerCadena("Nuevo nombre: ", piezasProductos[producto][pieza], MAX_NOMBRE);
                         } else if (opPieza == 2) {
@@ -256,37 +267,74 @@ int main() {
                             leerCadena("Nuevo nombre: ", piezasProductos[producto][pieza], MAX_NOMBRE);
                             leerEnteroPositivo("Nuevo tiempo de instalacion: ", &tiemposPiezas[producto][pieza]);
                             leerEnteroPositivo("Nueva cantidad necesaria por unidad: ", &piezasNecesarias[producto][pieza]);
-                        } else {
-                            printf("Opcion invalida.\n");
-                            continue;
                         }
-                        int nuevoTiempoTotal = 0;
-                        for (int j = 0; j < MAX_PIEZAS; j++) {
-                            nuevoTiempoTotal += tiemposPiezas[producto][j];
-                        }
-                        productosFTiempo[producto] = nuevoTiempoTotal;
-                        printf("Tiempo promedio de fabricacion actualizado automaticamente: %d minutos\n", nuevoTiempoTotal);
+
+                        recalcularTiemposProductos(productosFTiempo, tiemposPiezas, totalProductos);
+                        printf("Tiempo promedio de fabricacion actualizado: %d minutos\n", productosFTiempo[producto]);
+
                     } else if (ed == 3) {
                         printf("Seleccione la pieza para cambiar la cantidad necesaria:\n");
                         for (int j = 0; j < MAX_PIEZAS; j++) {
-                            printf("%d. %s (Cantidad actual: %d)\n", j + 1, piezasProductos[producto][j], piezasNecesarias[producto][j]);
+                            if (strlen(piezasProductos[producto][j]) != 0) {
+                                printf("%d. %s (Cantidad actual: %d)\n", j + 1, piezasProductos[producto][j], piezasNecesarias[producto][j]);
+                            }
                         }
                         int pieza;
                         leerEnteroNoNegativo("Numero de pieza (0 para cancelar): ", &pieza);
                         if (pieza == 0 || pieza > MAX_PIEZAS) {
-                            printf("Edicion de cantidad cancelada.\n");
+                            printf("Edicion cancelada.\n");
                             break;
                         }
                         pieza--;
-                        printf("Pieza seleccionada: %s\n", piezasProductos[producto][pieza]);
                         leerEnteroPositivo("Nueva cantidad necesaria por unidad: ", &piezasNecesarias[producto][pieza]);
+
+                    } else if (ed == 4) {
+                        printf("Stock actual: %d\n", stockProductos[producto]);
+                        leerEnteroNoNegativo("Nuevo stock para el producto: ", &stockProductos[producto]);
+
+                    } else if (ed == 5) {
+                        printf("Seleccione la pieza que desea eliminar:\n");
+                        for (int j = 0; j < MAX_PIEZAS; j++) {
+                            if (strlen(piezasProductos[producto][j]) != 0) {
+                                printf("%d. %s\n", j + 1, piezasProductos[producto][j]);
+                            }
+                        }
+                        int pieza;
+                        leerEnteroNoNegativo("Numero de pieza (0 para cancelar): ", &pieza);
+                        if (pieza == 0 || pieza > MAX_PIEZAS) {
+                            printf("Cancelado.\n");
+                            break;
+                        }
+                        pieza--;
+
+                        printf("Confirmar eliminacion de %s? (S/N): ", piezasProductos[producto][pieza]);
+                        char confirmacion;
+                        leerCaracter("Confirmar: ", &confirmacion);
+                        if (confirmacion == 'S' || confirmacion == 's') {
+                            for (int j = pieza; j < MAX_PIEZAS - 1; j++) {
+                                strcpy(piezasProductos[producto][j], piezasProductos[producto][j + 1]);
+                                piezasNecesarias[producto][j] = piezasNecesarias[producto][j + 1];
+                                tiemposPiezas[producto][j] = tiemposPiezas[producto][j + 1];
+                                stockPiezas[producto][j] = stockPiezas[producto][j + 1];
+                            }
+                            strcpy(piezasProductos[producto][MAX_PIEZAS - 1], "");
+                            piezasNecesarias[producto][MAX_PIEZAS - 1] = 0;
+                            tiemposPiezas[producto][MAX_PIEZAS - 1] = 0;
+                            stockPiezas[producto][MAX_PIEZAS - 1] = 0;
+
+                            printf("Pieza eliminada.\n");
+                            recalcularTiemposProductos(productosFTiempo, tiemposPiezas, totalProductos);
+                        } else {
+                            printf("Eliminacion cancelada.\n");
+                        }
+
                     } else {
                         printf("Opcion invalida.\n");
                     }
                 } while (!salirEdicion);
-
                 break;
             }
+
 
             case 3: {
                 if (totalProductos == 0) {
@@ -306,9 +354,7 @@ int main() {
                 int cantidadEncontrados = 0;
 
                 if (strlen(busqueda) == 0) {
-                    printf("Lista de todos los productos:\n");
                     for (int i = 0; i < totalProductos; i++) {
-                        printf("%d. %s\n", i + 1, productos[i]);
                         encontrados[cantidadEncontrados++] = i;
                     }
                 } else {
@@ -324,7 +370,7 @@ int main() {
                     break;
                 }
 
-                if (strlen(busqueda) != 0) {
+                if (strlen(busqueda) != 0 || cantidadEncontrados > 1) {
                     printf("Productos encontrados:\n");
                     for (int i = 0; i < cantidadEncontrados; i++) {
                         printf("%d. %s\n", i + 1, productos[encontrados[i]]);
@@ -332,93 +378,47 @@ int main() {
                 }
 
                 int seleccion;
-                printf("Seleccione el numero del producto a eliminar (0 para salir): ");
-                leerEnteroNoNegativo("Numero de producto: ", &seleccion);
-
+                leerEnteroNoNegativo("Seleccione el numero del producto a eliminar (0 para cancelar): ", &seleccion);
                 if (seleccion == 0 || seleccion > cantidadEncontrados) {
-                    break;
-                }
-
-                printf("Desea eliminar piezas o el producto?\n");
-                printf("1. Eliminar piezas\n");
-                printf("2. Eliminar producto\n");
-                printf("0. Salir\n");
-                int eliminar;
-                leerEnteroNoNegativo("Seleccione opcion: ", &eliminar);
-                if (eliminar == 0) {
                     printf("Eliminacion cancelada.\n");
                     break;
-                } else if (eliminar == 1) {
-
-                    printf("Que pieza desea eliminar?\n");
-                    for (int i = 0; i < MAX_PIEZAS; i++) {
-                        if (strlen(piezasProductos[encontrados[seleccion - 1]][i]) > 0) {
-                            printf("%d. %s\n", i + 1, piezasProductos[encontrados[seleccion - 1]][i]);
-                        }
-                    }
-
-                    int pieza;
-                    leerEnteroNoNegativo("Seleccione pieza a eliminar (0 para salir): ", &pieza);
-                    if (pieza == 0 || pieza > MAX_PIEZAS) {
-                        printf("Eliminacion de pieza cancelada.\n");
-                        break;
-                    }
-                    pieza--;
-
-                    printf("Esta seguro que desea eliminar la pieza %s? (S para confirmar, N para cancelar): ", piezasProductos[encontrados[seleccion - 1]][pieza]);
-                    char confirmacion;
-                    leerCaracter("Confirmacion: ", &confirmacion);
-                    if (confirmacion != 'S' && confirmacion != 's') {
-                        printf("Eliminacion de pieza cancelada.\n");
-                        break;
-                    }
-
-                    printf("Pieza seleccionada: %s\n", piezasProductos[encontrados[seleccion - 1]][pieza]);
-                    strcpy(piezasProductos[encontrados[seleccion - 1]][pieza], "");
-                    tiemposPiezas[encontrados[seleccion - 1]][pieza] = 0;
-                    stockPiezas[encontrados[seleccion - 1]][pieza] = 0;
-                    piezasNecesarias[encontrados[seleccion - 1]][pieza] = 0;
-                    totalPiezas[encontrados[seleccion - 1]]--;
-                    printf("Pieza eliminada.\n");
-                    break;
-                } else if (eliminar == 2) {
-                    printf("Esta seguro que desea eliminar el producto %s? (S para confirmar, N para cancelar): ", productos[encontrados[seleccion - 1]]);
-                    char confirmacion;
-                    leerCaracter("Confirmacion: ", &confirmacion);
-                    if (confirmacion != 'S' && confirmacion != 's') {
-                        printf("Eliminacion de producto cancelada.\n");
-                        break;
-                    }
-                    int producto = encontrados[seleccion - 1];
-
-                    if (producto >= 0 && producto < totalProductos) {
-                        for (int i = producto; i < totalProductos - 1; i++) {
-                            strcpy(productos[i], productos[i + 1]);
-                            productosFTiempo[i] = productosFTiempo[i + 1];
-                            for (int j = 0; j < MAX_PIEZAS; j++) {
-                                strcpy(piezasProductos[i][j], piezasProductos[i + 1][j]);
-                                tiemposPiezas[i][j] = tiemposPiezas[i + 1][j];
-                                stockPiezas[i][j] = stockPiezas[i + 1][j];
-                                piezasNecesarias[i][j] = piezasNecesarias[i + 1][j];
-                            }
-                        }
-                        strcpy(productos[totalProductos - 1], "");
-                        productosFTiempo[totalProductos - 1] = 0;
-                        for (int j = 0; j < MAX_PIEZAS; j++) {
-                            strcpy(piezasProductos[totalProductos - 1][j], "");
-                            tiemposPiezas[totalProductos - 1][j] = 0;
-                            stockPiezas[totalProductos - 1][j] = 0;
-                            piezasNecesarias[totalProductos - 1][j] = 0;
-                        }
-                        totalProductos--;
-                        printf("Producto eliminado.\n");
-                    }
-
-                } else {
-                    printf("Producto seleccionado no es valido.\n");
                 }
+
+                int producto = encontrados[seleccion - 1];
+                char confirmacion;
+                leerCaracter("Esta seguro que desea eliminar el producto? (S/N): ", &confirmacion);
+                if (confirmacion != 'S' && confirmacion != 's') {
+                    printf("Eliminacion cancelada.\n");
+                    break;
+                }
+
+                for (int i = producto; i < totalProductos - 1; i++) {
+                    strcpy(productos[i], productos[i + 1]);
+                    productosFTiempo[i] = productosFTiempo[i + 1];
+                    stockProductos[i] = stockProductos[i + 1];
+                    for (int j = 0; j < MAX_PIEZAS; j++) {
+                        strcpy(piezasProductos[i][j], piezasProductos[i + 1][j]);
+                        tiemposPiezas[i][j] = tiemposPiezas[i + 1][j];
+                        stockPiezas[i][j] = stockPiezas[i + 1][j];
+                        piezasNecesarias[i][j] = piezasNecesarias[i + 1][j];
+                    }
+                }
+
+                strcpy(productos[totalProductos - 1], "");
+                productosFTiempo[totalProductos - 1] = 0;
+                stockProductos[totalProductos - 1] = 0;
+                for (int j = 0; j < MAX_PIEZAS; j++) {
+                    strcpy(piezasProductos[totalProductos - 1][j], "");
+                    tiemposPiezas[totalProductos - 1][j] = 0;
+                    stockPiezas[totalProductos - 1][j] = 0;
+                    piezasNecesarias[totalProductos - 1][j] = 0;
+                }
+
+                totalProductos--;
+                printf("Producto eliminado exitosamente.\n");
                 break;
             }
+
 
             case 4: {
                 if (totalProductos == 0) {
@@ -434,7 +434,7 @@ int main() {
                     printf("+----------+-------------------------+---------+-------------------------+\n");
                     for (int j = 0; j < MAX_PIEZAS; j++) {
                         if (strlen(piezasProductos[i][j]) != 0) {
-                            printf("| %8d | %-23s | %6d | %22d |\n",
+                            printf("| %8d | %-23s | %-7d | %19d min |\n",
                                 piezasNecesarias[i][j],
                                 piezasProductos[i][j],
                                 stockPiezas[i][j],
@@ -442,7 +442,7 @@ int main() {
                             );
                         }
                     }
-                    printf("+----------+--------------------------+---------+-------------------------+\n");
+                    printf("+----------+-------------------------+---------+-------------------------+\n");
                 }
                 break;
             }
@@ -452,67 +452,265 @@ int main() {
                     printf("No hay productos registrados. Registre al menos uno primero.\n");
                     break;
                 }
+
                 printf("===== ANALISIS DE PRODUCCION =====\n");
 
+                printf("+-----+-------------------------------+--------------------+\n");
+                printf("| No. | Nombre del producto           | Stock Fabricable   |\n");
+                printf("+-----+-------------------------------+--------------------+\n");
+
                 for (int i = 0; i < totalProductos; i++) {
-                    printf("%d. %s\n", i + 1, productos[i]);
+                    int minStock = 100000;
+                    for (int j = 0; j < MAX_PIEZAS; j++) {
+                        if (piezasNecesarias[i][j] > 0) {
+                            int posibles = stockPiezas[i][j] / piezasNecesarias[i][j];
+                            if (posibles < minStock) minStock = posibles;
+                        }
+                    }
+                    stockProductos[i] = minStock;
+                    printf("| %-3d | %-29s | %-18d |\n", i + 1, productos[i], stockProductos[i]);
                 }
+
+                printf("+-----+-------------------------------+--------------------+\n");
+
 
                 int producto;
                 leerEnteroNoNegativo("Seleccione producto (0 para salir): ", &producto);
                 if (producto == 0 || producto > totalProductos) {
                     break;
-               
                 }
                 producto--;
 
-                int minFabricables = -1;
-                for (int p = 0; p < MAX_PIEZAS; p++) {
-                    int necesarias = piezasNecesarias[producto][p];
-                    if (necesarias == 0){
-                        necesarias = 1;
-                    }
-                    int posibles = stockPiezas[producto][p] / necesarias;
-                    if (posibles > minFabricables) {
-                        minFabricables = posibles;
+                int tiempoUnidad = productosFTiempo[producto];
+                printf("-> Tiempo por unidad: %d minutos\n", tiempoUnidad);
+
+                int minStock = 100000;
+                for (int j = 0; j < MAX_PIEZAS; j++) {
+                    if (piezasNecesarias[producto][j] > 0) {
+                        int posibles = stockPiezas[producto][j] / piezasNecesarias[producto][j];
+                        if (posibles < minStock) minStock = posibles;
                     }
                 }
+                stockProductos[producto] = minStock;
 
-                int tiempoTotal = 0;
-                for (int p = 0; p < MAX_PIEZAS; p++) {
-                    tiempoTotal += tiemposPiezas[producto][p];
-                }
-
-                if (minFabricables <= 0) {
-                    printf("No es posible fabricar unidades con el stock actual.\n");
-                } else {
-                    printf("-> Tiempo total por unidad: %d minutos\n", tiempoTotal);
-
-                    int tiempoDisponible;
-                    leerEnteroNoNegativo("Ingrese tiempo disponible (en minutos): ", &tiempoDisponible);
-                    int porTiempo;
-                    if (tiempoTotal > 0) {
-                        porTiempo = tiempoDisponible / tiempoTotal;
-                    } else {
-                        porTiempo = 0;
-                    }
-
-                    int maxFinal = (porTiempo < minFabricables) ? porTiempo : minFabricables;
-                    printf("-> Unidades maximas en ese tiempo: %d\n", maxFinal);
-
-                    if (maxFinal < porTiempo) {
-                        printf("-> Faltan piezas para producir mas:\n");
-                        for (int p = 0; p < MAX_PIEZAS; p++) {
-                            int faltan = (porTiempo * piezasNecesarias[producto][p]) - stockPiezas[producto][p];
-                            if (faltan > 0) {
-                                printf("   - %s: faltan %d piezas\n", piezasProductos[producto][p], faltan);
+                char agregarStock;
+                int agregarOpcion;
+                if (stockProductos[producto] == 0) {
+                    printf("-> No hay stock disponible para fabricar.\n");
+                    printf("-> No se puede fabricar el producto %s.\n", productos[producto]);
+                    
+                    leerCaracter("Desea agregar mas piezas a su stock? (S/N): ", &agregarStock);
+                    if (agregarStock == 'S' || agregarStock == 's') {
+                        printf("1. Agregar por pieza\n");
+                        printf("2. Agregar a todas las piezas\n");
+                        printf("0. Cancelar\n");
+                        
+                        leerEnteroNoNegativo("Seleccione opcion: ", &agregarOpcion);
+                        if (agregarOpcion == 0) {
+                            printf("Agregado de stock cancelado.\n");
+                            break;
+                        }
+                        if (agregarOpcion == 1) {
+                            printf("Seleccione la pieza a agregar stock:\n");
+                            for (int i = 0; i < MAX_PIEZAS; i++) {
+                                if (strlen(piezasProductos[producto][i]) != 0) {
+                                    printf("%d. %s\n", i + 1, piezasProductos[producto][i]);
+                                }
                             }
+                            int pieza;
+                            leerEnteroNoNegativo("Seleccione pieza (0 para salir): ", &pieza);
+                            if (pieza == 0 || pieza > MAX_PIEZAS) {
+                                printf("Agregado de stock cancelado.\n");
+                                break;
+                            }
+                            pieza--;
+                            printf("Pieza seleccionada: %s\n", piezasProductos[producto][pieza]);
+                            printf("Stock actual: %d\n", stockPiezas[producto][pieza]);
+                            int agregarCantidad;
+                            leerEnteroPositivo("Cantidad a agregar: ", &agregarCantidad);
+                            stockPiezas[producto][pieza] += agregarCantidad;
+                            printf("-> Stock actualizado.\n");
+                        } else if (agregarOpcion == 2) {
+                            int agregarCantidad;
+                            leerEnteroPositivo("Cantidad a agregar: ", &agregarCantidad);
+                            for (int i = 0; i < MAX_PIEZAS; i++) {
+                                stockPiezas[producto][i] += agregarCantidad;
+                            }
+                            printf("-> Stock actualizado.\n");
+                        } else {
+                            printf("-> No se agrego stock.\n");
+                            break;
                         }
                     }
+                    if (agregarStock == 'N' || agregarStock == 'n' || agregarOpcion == 0) {
+                        printf("-> No se agrego stock.\n");
+                        break;
+                    }
+                    
+                }
+                if (agregarStock == 'N' || agregarStock == 'n' || agregarOpcion == 0) {
                     break;
                 }
 
+                printf("-> Actualmente se pueden fabricar %d unidades en un tiempo de: \n", stockProductos[producto]);
+                mostrarTiempo(stockProductos[producto] * productosFTiempo[producto]);
+
+                int opcionModo;
+                printf("\n1. Ingresar cantidad a fabricar\n");
+                printf("2. Ingresar tiempo disponible\n");
+                leerEnteroNoNegativo("Seleccione una opcion: ", &opcionModo);
+
+                int cantidadFabricar = 0;
+                int tiempoDisponible = 0;
+                int posiblesPorStock = 100000;
+
+                for (int i = 0; i < MAX_PIEZAS; i++) {
+                    if (piezasNecesarias[producto][i] > 0) {
+                        int posibles = stockPiezas[producto][i] / piezasNecesarias[producto][i];
+                        if (posibles < posiblesPorStock) {
+                            posiblesPorStock = posibles;
+                        }
+                    }
+                }
+
+                if (opcionModo == 1) {
+                    leerEnteroPositivo("Ingrese la cantidad que desea fabricar: ", &cantidadFabricar);
+                    int tiempoTotal = cantidadFabricar * tiempoUnidad;
+
+                    if (cantidadFabricar <= posiblesPorStock) {
+                        printf("-> Fabricar %d unidades tomaria:\n", cantidadFabricar);
+                        mostrarTiempo(tiempoTotal);
+                    } else {
+                        printf("-> No hay suficiente stock para fabricar %d unidades.\n", cantidadFabricar);
+                        printf("-> Con el stock actual solo se pueden fabricar %d unidades.\n", posiblesPorStock);
+                        int tiempoMaximo = posiblesPorStock * tiempoUnidad;
+                        printf("-> Tiempo para fabricar %d unidades (maximo posible):\n", posiblesPorStock);
+                        mostrarTiempo(tiempoMaximo);
+
+                        printf("-> Faltan las siguientes piezas:\n");
+                        for (int i = 0; i < MAX_PIEZAS; i++) {
+                            int faltan = cantidadFabricar * piezasNecesarias[producto][i] - stockPiezas[producto][i];
+                            if (faltan > 0) {
+                                printf("   - %s: faltan %d unidades\n", piezasProductos[producto][i], faltan);
+                            }
+                        }
+
+                        char reponer;
+                        leerCaracter("Desea reponer las piezas faltantes? (S/N): ", &reponer);
+                        if (reponer == 'S' || reponer == 's') {
+                            char modo;
+                            leerCaracter("Desea reponer individualmente (I) o automaticamente todas (A)? ", &modo);
+                            if (modo == 'A' || modo == 'a') {
+                                for (int i = 0; i < MAX_PIEZAS; i++) {
+                                    int faltan = cantidadFabricar * piezasNecesarias[producto][i] - stockPiezas[producto][i];
+                                    if (faltan > 0) {
+                                        stockPiezas[producto][i] += faltan;
+                                    }
+                                }
+                                printf("-> Piezas repuestas automaticamente.\n");
+                            } else if (modo == 'I' || modo == 'i') {
+                                for (int i = 0; i < MAX_PIEZAS; i++) {
+                                    int faltan = cantidadFabricar * piezasNecesarias[producto][i] - stockPiezas[producto][i];
+                                    if (faltan > 0) {
+                                        printf("-> Falta %s: %d unidades\n", piezasProductos[producto][i], faltan);
+                                        int agregar = 0;
+                                        leerEnteroNoNegativo("Cuantas desea agregar?: ", &agregar);
+                                        stockPiezas[producto][i] += agregar;
+                                    }
+                                }
+                            }
+                        } else {
+                            printf("-> No se repusieron piezas.\n");
+                            printf("-> Pedido cancelado.\n");
+                            break;
+                        }
+                    }
+
+                } else if (opcionModo == 2) {
+                    leerEnteroPositivo("Ingrese tiempo disponible (en minutos): ", &tiempoDisponible);
+
+                    int porTiempo = tiempoDisponible / tiempoUnidad;
+                    int fabricablesFinal;
+                    if (porTiempo < posiblesPorStock) {
+                        fabricablesFinal = porTiempo;
+                    } else {
+                        fabricablesFinal = posiblesPorStock;
+                    }
+
+                    if (fabricablesFinal == 0) {
+                        printf("-> No es posible fabricar unidades con el tiempo y stock actuales.\n");
+                        
+                        break;
+                    }
+
+                    
+
+                    if (porTiempo > posiblesPorStock) {
+                        printf("-> No hay suficiente stock para fabricar %d unidades en un tiempo de: \n", porTiempo);
+                        mostrarTiempo(porTiempo * tiempoUnidad);
+                        printf("\n");
+                        printf("-> Faltan las siguientes piezas:\n");
+                        for (int i = 0; i < MAX_PIEZAS; i++) {
+                            int faltan = (porTiempo * piezasNecesarias[producto][i]) - stockPiezas[producto][i];
+                            if (faltan > 0) {
+                                printf("   - %s: faltan %d unidades\n", piezasProductos[producto][i], faltan);
+                            }
+                        }
+                        char reponer;
+                        leerCaracter("Desea agregar las piezas faltantes? (S/N): ", &reponer);
+                        if (reponer == 'S' || reponer == 's') {
+                            char modo;
+                            leerCaracter("Desea reponer individualmente (I) o automaticamente todas (A)? ", &modo);
+                            if (modo == 'A' || modo == 'a') {
+                                for (int i = 0; i < MAX_PIEZAS; i++) {
+                                    int faltan = (porTiempo * piezasNecesarias[producto][i]) - stockPiezas[producto][i];
+                                    if (faltan > 0) {
+                                        stockPiezas[producto][i] += faltan;
+                                    }
+                                }
+                                printf("-> Piezas repuestas automaticamente.\n");
+                            } else if (modo == 'I' || modo == 'i') {
+                                for (int i = 0; i < MAX_PIEZAS; i++) {
+                                    int faltan = (porTiempo * piezasNecesarias[producto][i]) - stockPiezas[producto][i];
+                                    if (faltan > 0) {
+                                        printf("-> Falta %s: %d unidades\n", piezasProductos[producto][i], faltan);
+                                        int agregar = 0;
+                                        leerEnteroNoNegativo("Cuantas desea agregar?: ", &agregar);
+                                        stockPiezas[producto][i] += agregar;
+                                    }
+                                }
+                            }
+                        } else {
+                            printf("-> No se repusieron piezas.\n");
+                            break;
+                        }
+                    } else {
+                        printf("-> Se pueden fabricar %d unidades en un tiempo de: \n", fabricablesFinal);
+                        mostrarTiempo(fabricablesFinal * tiempoUnidad);
+                    }
+
+                    
+                }
+
+                char confirmar;
+                int tiempoFinal = cantidadFabricar * tiempoUnidad;
+                leerCaracter("Desea realizar el pedido? (S/N): ", &confirmar);
+                if (confirmar == 'S' || confirmar == 's') {
+                    for (int i = 0; i < MAX_PIEZAS; i++) {
+                        stockPiezas[producto][i] -= piezasNecesarias[producto][i] * cantidadFabricar;
+                    }
+                    stockFProductos[producto] += cantidadFabricar;
+                    printf("-> Pedido confirmado. Se ha enviado el pedido para la fabricacion de %d unidades de %s.\n", cantidadFabricar, productos[producto]);
+                    printf("-> Tiempo estimado de produccion:\n");
+                    mostrarTiempo(tiempoFinal);
+                } else {
+                    printf("-> Pedido cancelado.\n");
+                }
+
+                break;
             }
+
+
 
             case 6: {
                 if (totalProductos == 0) {
@@ -527,7 +725,9 @@ int main() {
 
                 int producto;
                 leerEnteroNoNegativo("Seleccione producto (0 para salir): ", &producto);
-                if (producto == 0 || producto > totalProductos) break;
+                if (producto == 0 || producto > totalProductos) {
+                    break;
+                }
                 producto--;
 
                 printf("Producto seleccionado: %s\n", productos[producto]);
@@ -567,6 +767,24 @@ int main() {
                 } else {
                     printf("No se puede agregar stock a una pieza no registrada.\n");
                 }
+                break;
+            }
+
+            case 7: {
+                if (totalProductos == 0) {
+                    printf("No hay productos registrados.\n");
+                    break;
+                }
+
+                printf("===== STOCK DE PRODUCTOS =====\n");
+                printf("+-----+-------------------------------+--------------------+\n");
+                printf("| No. | Nombre del producto           | Stock Actual       |\n");
+                printf("+-----+-------------------------------+--------------------+\n");
+                for (int i = 0; i < totalProductos; i++) {
+                    printf("| %-3d | %-29s | %-18d |\n", i + 1, productos[i], stockFProductos[i]);
+                }
+                printf("+-----+-------------------------------+--------------------+\n");
+
                 break;
             }
 

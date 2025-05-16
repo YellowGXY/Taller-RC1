@@ -110,3 +110,68 @@ void leerCaracter(char* mensaje, char* destino) {
         }
     }
 }
+
+void recalcularTiemposProductos(int *productosFTiempo, int (*tiemposPiezas)[MAX_PIEZAS], int totalProductos) {
+    for (int i = 0; i < totalProductos; i++) {
+        int suma = 0;
+        for (int j = 0; j < MAX_PIEZAS; j++) {
+            suma += tiemposPiezas[i][j];
+        }
+        productosFTiempo[i] = suma;
+    }
+}
+
+void mostrarTiempo(int minutosTotales) {
+    int semanas = minutosTotales / 10080;
+    minutosTotales = minutosTotales % 10080;
+
+    int dias = minutosTotales / 1440;
+    minutosTotales = minutosTotales % 1440;
+
+    int horas = minutosTotales / 60;
+    int minutos = minutosTotales % 60;
+
+    printf("   ");
+    
+    if (semanas > 0) {
+        printf("%d ", semanas);
+        if (semanas == 1) {
+            printf("semana ");
+        } else {
+            printf("semanas ");
+        }
+    }
+
+    if (dias > 0) {
+        printf("%d ", dias);
+        if (dias == 1) {
+            printf("dia ");
+        } else {
+            printf("dias ");
+        }
+    }
+
+    if (horas > 0) {
+        printf("%d ", horas);
+        if (horas == 1) {
+            printf("hora ");
+        } else {
+            printf("horas ");
+        }
+    }
+
+    if (minutos > 0) {
+        printf("%d ", minutos);
+        if (minutos == 1) {
+            printf("minuto");
+        } else {
+            printf("minutos");
+        }
+    }
+
+    if (semanas == 0 && dias == 0 && horas == 0 && minutos == 0) {
+        printf("0 minutos");
+    }
+
+    printf("\n");
+}
