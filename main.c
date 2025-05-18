@@ -192,24 +192,17 @@ int main() {
                         }
                         producto--;
 
-                        printf("Producto seleccionado: %s\n", productos[producto]);
-                        printf("Stock actual de unidades terminadas: %d\n", stockProductos[producto]);
-                        printf("Tiempo de fabricacion promedio: %d minutos\n", productosFTiempo[producto]);
-
-                        printf("+----------+-------------------------+---------+-------------------------+\n");
-                        printf("| Cantidad | Nombre                  |  Stock  |  Tiempo de Instalacion  |\n");
-                        printf("+----------+-------------------------+---------+-------------------------+\n");
-                        for (int j = 0; j < MAX_PIEZAS; j++) {
-                            if (strlen(piezasProductos[producto][j]) != 0) {
-                                printf("| %8d | %-23s | %-7d | %19d min |\n",
-                                    piezasNecesarias[producto][j],
-                                    piezasProductos[producto][j],
-                                    stockPiezas[producto][j],
-                                    tiemposPiezas[producto][j]
-                                );
-                            }
-                        }
-                        printf("+----------+-------------------------+---------+-------------------------+\n");
+                        mostrarTablaProductosPiezas(
+                            producto,
+                            productos,
+                            stockProductos,
+                            totalProductos,
+                            productosFTiempo,
+                            piezasNecesarias,
+                            piezasProductos,
+                            stockPiezas,
+                            tiemposPiezas
+                        );
 
                         printf("=====================================\n");
                         printf("Opciones de edicion:\n");

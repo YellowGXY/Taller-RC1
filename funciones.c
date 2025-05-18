@@ -177,3 +177,35 @@ void mostrarTiempo(int minutosTotales) {
 
     printf("\n");
 }
+
+void mostrarTablaProductosPiezas(
+    int producto, 
+    char productos[MAX_PRODUCTO][MAX_NOMBRE],
+    int stockProductos[MAX_PRODUCTO], 
+    int totalProductos, 
+    int productosFTiempo[MAX_PRODUCTO], 
+    int piezasNecesarias[MAX_PRODUCTO][MAX_PIEZAS], 
+    char piezasProductos[MAX_PRODUCTO][MAX_PIEZAS][MAX_NOMBRE],
+    int stockPiezas[MAX_PRODUCTO][MAX_PIEZAS],
+    int tiemposPiezas[MAX_PRODUCTO][MAX_PIEZAS]
+    ) {
+
+    printf("Producto seleccionado: %s\n", productos[producto]);
+    printf("Stock actual de unidades terminadas: %d\n", stockProductos[producto]);
+    printf("Tiempo de fabricacion promedio: %d minutos\n", productosFTiempo[producto]);
+
+    printf("+----------+-------------------------+---------+-------------------------+\n");
+    printf("| Cantidad | Nombre                  |  Stock  |  Tiempo de Instalacion  |\n");
+    printf("+----------+-------------------------+---------+-------------------------+\n");
+    for (int j = 0; j < MAX_PIEZAS; j++) {
+        if (strlen(piezasProductos[producto][j]) != 0) {
+            printf("| %8d | %-23s | %-7d | %19d min |\n",
+            piezasNecesarias[producto][j],
+            piezasProductos[producto][j],
+            stockPiezas[producto][j],
+            tiemposPiezas[producto][j]
+            );
+        }
+    }
+    printf("+----------+-------------------------+---------+-------------------------+\n");
+}
