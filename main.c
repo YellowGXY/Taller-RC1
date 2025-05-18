@@ -751,7 +751,7 @@ int main() {
                     printf("===== ANADIR STOCK DE PIEZAS =====\n");
 
                     for (int i = 0; i < totalProductos; i++) {
-                        printf("%d. %s\n", i + 1, productos[i]);
+                        printf("%d. \t%s\n", i + 1, productos[i]);
                     }
 
                     int producto;
@@ -766,13 +766,10 @@ int main() {
                     printf("Seleccione la pieza a agregar stock:\n");
                     for (int j = 0; j < MAX_PIEZAS; j++) {
                         if (strlen(piezasProductos[producto][j]) != 0) {
-                            printf("%d. %s\n", j + 1, piezasProductos[producto][j]);
-                        } else {
-                            char dis[MAX_NOMBRE] = "--No Registrado--";
-                            printf("%d. %s\n", j + 1, dis);
+                            printf("%d. \t%s\n", j + 1, piezasProductos[producto][j]);
                         }
                     }
-                    printf("0. Cancelar\n");
+                    printf("0. \tCancelar\n");
                     int piezasAgregable[MAX_PIEZAS];
                     for (int j = 0; j < MAX_PIEZAS; j++) {
                         if (strlen(piezasProductos[producto][j]) != 0) {
@@ -790,7 +787,6 @@ int main() {
                     pieza--;
                     printf("Pieza seleccionada: %s\n", piezasProductos[producto][pieza]);
                     printf("Stock actual: %d\n", stockPiezas[producto][pieza]);
-                    printf("Cantidad a agregar: ");
                     int add;
                     leerEnteroPositivo("Cantidad a agregar: ", &add);
                     if (piezasAgregable[pieza] > 0) {
