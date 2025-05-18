@@ -816,6 +816,16 @@ int main() {
                 }
 
                 case 8: {
+                    printf("Para cambiar las credenciales, ingrese el nombre de usuario y contrasena actuales.\n");
+                    leerCadena("Nombre de usuario: ", usuario, MAX_NOMBRE);
+                    leerCadena("Contrasena: ", pass, MAX_NOMBRE);
+                    if (strcmp(usuario, USUARIO) != 0 || strcmp(pass, PASSWORD) != 0) {
+                        printf("Credenciales incorrectas.\n");
+                        break;
+                    } else {
+                        printf("Credenciales correctas.\n");
+                        printf("\n");
+                    }
                     printf("===== CAMBIO DE CREDENCIALES =====\n");
                     printf("1. Cambiar nombre de usuario\n");
                     printf("2. Cambiar contrasena\n");
