@@ -4,14 +4,14 @@
 
 int main() {
 
-    char productos[MAX_PRODUCTO][MAX_NOMBRE] = {"Celulares", "Laptops", "Tablets", "Audifonos Inalambricos", "Smartwatches"};
+    char productos[MAX_PRODUCTO][MAX_NOMBRE] = {"Celular - 1", "Laptop - 1", "Tablet - 1", "Audifonos - 1", "Smartwatch - 1"};
 
     char piezasProductos[MAX_PRODUCTO][MAX_PIEZAS][MAX_NOMBRE] = {
-        {"C1-Screen", "C1-Bateria", "C1-Carcasa", "C1-Procesador", "C1-Camara"},
-        {"L1-Pantalla", "L1-Teclado", "L1-Bateria", "L1-Placa Base", "L1-Ventilador"},
-        {"T1-Pantalla", "T1-Bateria", "T1-Procesador", "T1-Carcasa", "T1-Puerto USB-C"},
-        {"A1-Auri Izq", "A1-Auri Der", "A1-Bateria", "A1-Bluetooth", "A1-Microfono"},
-        {"S1-Pantalla", "S1-Bateria", "S1-Correa", "S1-Sensor", "S1-Procesador"}
+        {"C1 - Pantalla", "C1 - Bateria", "C1 - Carcasa", "C1 - Procesador", "C1 - Camara"},
+        {"L1 - Pantalla", "L1 - Teclado", "L1 - Bateria", "L1 - Placa Base", "L1 - Ventilador"},
+        {"T1 - Pantalla", "T1 - Bateria", "T1 - Procesador", "T1 - Carcasa", "T1 - Puerto USB-C"},
+        {"A1 - Auri Izq", "A1 - Auri Der", "A1 - Bateria", "A1 - Bluetooth", "A1 - Microfono"},
+        {"S1 - Pantalla", "S1 - Bateria", "S1 - Correa", "S1 - Sensor", "S1 - Procesador"}
     };
 
     int tiemposPiezas[MAX_PRODUCTO][MAX_PIEZAS] = {
@@ -248,9 +248,9 @@ int main() {
                             printf("Seleccione la pieza a editar:\n");
                             for (int j = 0; j < MAX_PIEZAS; j++) {
                                 if (strlen(piezasProductos[producto][j]) != 0) {
-                                    printf("%d. %s\n", j + 1, piezasProductos[producto][j]);
+                                    printf("%d. \t%s\n", j + 1, piezasProductos[producto][j]);
                                 } else {
-                                    printf("%d. --Espacio Disponible--\n", j + 1);
+                                    printf("%d. \t--Espacio Disponible--\n", j + 1);
                                 }
                             }
                             int pieza;
@@ -365,7 +365,7 @@ int main() {
 
                     char busqueda[MAX_NOMBRE];
                     printf("Ingrese el nombre del producto a buscar (deje vacio para ver todos): ");
-                    fgets(busqueda, sizeof(busqueda), stdin);
+                    fgets(busqueda, MAX_NOMBRE, stdin);
                     int len = strlen(busqueda);
                     if (len > 0 && busqueda[len - 1] == '\n') {
                         busqueda[len - 1] = '\0';
@@ -374,14 +374,21 @@ int main() {
                     int encontrados[MAX_PRODUCTO];
                     int cantidadEncontrados = 0;
 
-                    if (strlen(busqueda) == 0) {
-                        for (int i = 0; i < totalProductos; i++) {
+                    for (int i = 0; i < totalProductos; i++) {
+                        if (strlen(busqueda) == 0) {
                             encontrados[cantidadEncontrados++] = i;
-                        }
-                    } else {
-                        for (int i = 0; i < totalProductos; i++) {
-                            if (strcmp(productos[i], busqueda) == 0) {
-                                encontrados[cantidadEncontrados++] = i;
+                        } else {
+                            int lenProd = strlen(productos[i]);
+                            int lenBusq = strlen(busqueda);
+                            for (int j = 0; j <= lenProd - lenBusq; j++) {
+                                int k = 0;
+                                while (k < lenBusq && productos[i][j + k] == busqueda[k]) {
+                                    k++;
+                                }
+                                if (k == lenBusq) {
+                                    encontrados[cantidadEncontrados++] = i;
+                                    break; 
+                                }
                             }
                         }
                     }
@@ -391,11 +398,9 @@ int main() {
                         break;
                     }
 
-                    if (strlen(busqueda) != 0 || cantidadEncontrados > 1) {
-                        printf("Productos encontrados:\n");
-                        for (int i = 0; i < cantidadEncontrados; i++) {
-                            printf("%d. %s\n", i + 1, productos[encontrados[i]]);
-                        }
+                    printf("Productos encontrados:\n");
+                    for (int i = 0; i < cantidadEncontrados; i++) {
+                        printf("%d. %s\n", i + 1, productos[encontrados[i]]);
                     }
 
                     int seleccion;
@@ -417,6 +422,8 @@ int main() {
                         strcpy(productos[i], productos[i + 1]);
                         productosFTiempo[i] = productosFTiempo[i + 1];
                         stockProductos[i] = stockProductos[i + 1];
+                        stockFProductos[i] = stockFProductos[i + 1];
+                        totalPiezas[i] = totalPiezas[i + 1];
                         for (int j = 0; j < MAX_PIEZAS; j++) {
                             strcpy(piezasProductos[i][j], piezasProductos[i + 1][j]);
                             tiemposPiezas[i][j] = tiemposPiezas[i + 1][j];
@@ -428,6 +435,8 @@ int main() {
                     strcpy(productos[totalProductos - 1], "");
                     productosFTiempo[totalProductos - 1] = 0;
                     stockProductos[totalProductos - 1] = 0;
+                    stockFProductos[totalProductos - 1] = 0;
+                    totalPiezas[totalProductos - 1] = 0;
                     for (int j = 0; j < MAX_PIEZAS; j++) {
                         strcpy(piezasProductos[totalProductos - 1][j], "");
                         tiemposPiezas[totalProductos - 1][j] = 0;
@@ -439,7 +448,6 @@ int main() {
                     printf("Producto eliminado exitosamente.\n");
                     break;
                 }
-
 
                 case 4: {
                     if (totalProductos == 0) {
@@ -515,7 +523,7 @@ int main() {
                     stockProductos[producto] = minStock;
 
                     char agregarStock;
-                    int agregarOpcion;
+                    int agregarOpcion = -1;
                     if (stockProductos[producto] == 0) {
                         printf("-> No hay stock disponible para fabricar.\n");
                         printf("-> No se puede fabricar el producto %s.\n", productos[producto]);
@@ -569,9 +577,11 @@ int main() {
                         }
                         
                     }
+
                     if (agregarStock == 'N' || agregarStock == 'n' || agregarOpcion == 0) {
                         break;
                     }
+                    
 
                     printf("-> Actualmente se pueden fabricar %d unidades en un tiempo de: \n", stockProductos[producto]);
                     mostrarTiempo(stockProductos[producto] * productosFTiempo[producto]);
@@ -710,7 +720,7 @@ int main() {
                             mostrarTiempo(fabricablesFinal * tiempoUnidad);
                         }
 
-                        
+                        cantidadFabricar = fabricablesFinal;
                     }
 
                     char confirmar;
