@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 #define MAX_NOMBRE 50
-#define MAX_PRODUCTO 10
-#define MAX_PIEZAS 10
+#define MAX_PRODUCTO 20
+#define MAX_PIEZAS 20
 
 void limpiarBuffer();
 void leerEnteroPositivo(char *mensaje, int *valor);

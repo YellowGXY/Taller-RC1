@@ -70,7 +70,9 @@ void leerCadena(char* mensaje, char* destino, int max) {
             destino[strcspn(destino, "\n")] = '\0';
 
             char* inicio = destino;
-            while (*inicio == ' ') inicio++;
+            while (*inicio == ' ') {
+                inicio++;
+            }	
 
             char* fin = destino + strlen(destino) - 1;
             while (fin >= inicio && *fin == ' ') {
