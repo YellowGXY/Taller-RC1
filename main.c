@@ -731,7 +731,7 @@ int main() {
                             stockPiezas[producto][i] -= piezasNecesarias[producto][i] * cantidadFabricar;
                         }
                         stockFProductos[producto] += cantidadFabricar;
-                        printf("-> Pedido confirmado. Se ha enviado el pedido para la fabricacion de %d unidades de %s.\n", cantidadFabricar, productos[producto]);
+                        printf("-> Pedido confirmado. \n\tSe ha enviado el pedido para la fabricacion de %d unidades de [%s].\n", cantidadFabricar, productos[producto]);
                         printf("-> Tiempo estimado de produccion:\n");
                         mostrarTiempo(tiempoFinal);
                     } else {
