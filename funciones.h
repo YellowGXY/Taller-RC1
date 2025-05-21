@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#define MAX_NOMBRE 50
-#define MAX_PRODUCTO_FIJO 100
-#define MAX_PIEZAS_FIJO 100
+#define MAX_NOMBRE 50 // Tamaño máximo para nombres de productos y piezas
+#define MAX_PRODUCTO_FIJO 100 // Tamaño máximo para productos
+#define MAX_PIEZAS_FIJO 100 // Tamaño máximo para piezas
 
 void limpiarBuffer();
 void leerEnteroPositivo(char *mensaje, int *valor);
@@ -46,7 +46,7 @@ void generarIdentificador(
 
 int buscarPiezaPorIdentificador(
     int productoIndex,
-    char piezas[MAX_PIEZAS_FIJO][MAX_NOMBRE],
+    char (*piezas)[MAX_NOMBRE],
     char* identificadorBuscado,
     int maxPiezas
 );
