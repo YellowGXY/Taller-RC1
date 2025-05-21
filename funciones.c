@@ -116,18 +116,25 @@ void leerCadena(char* mensaje, char* destino, int max) {
 // Valida que no sea un salto de línea, vacío ni un espacio.
 void leerCaracter(char* mensaje, char* destino) {
     int valido = 0;
-    char buffer[16];
+    int ch;
+    int siguiente;
+
     while (!valido) {
         printf("%s", mensaje);
-        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
-            // Elimina salto de línea si existe
-            buffer[strcspn(buffer, "\n")] = '\0';
-            if (strlen(buffer) == 1 && buffer[0] != ' ') {
-                *destino = buffer[0];
+        ch = getchar();
+
+        if (ch != '\n' && ch != ' ') {
+            siguiente = getchar();
+            if (siguiente == '\n') {
+                *destino = ch;  
                 valido = 1;
             } else {
-                printf("Ingrese solo un caracter valido (sin espacios).\n");
+                printf("Ingrese solo un caracter válido (sin espacios).\n");
+                limpiarBuffer();
             }
+        } else {
+            limpiarBuffer();
+            printf("Ingrese solo un caracter válido (sin espacios).\n");
         }
     }
 }
