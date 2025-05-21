@@ -306,8 +306,8 @@ int buscarPiezaPorIdentificador(int productoIndex, char (*piezas)[50], char *ide
     for (int i = 0; i < maxPiezas; i++) {
         if (strlen(piezas[i]) > 0) {
             int esPrefijo = 1;
-            const char *p1 = piezas[i];
-            const char *p2 = identificadorBuscado;
+            char *p1 = piezas[i];
+            char *p2 = identificadorBuscado;
             while (*p2) {
                 if (*p1 == '\0' || *p1 != *p2) {
                     esPrefijo = 0;
