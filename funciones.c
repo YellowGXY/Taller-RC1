@@ -113,10 +113,10 @@ void leerCaracter(char* mensaje, char* destino) {
     }
 }
 
-void recalcularTiemposProductos(int *productosFTiempo, int (*tiemposPiezas)[MAX_PIEZAS], int totalProductos) {
+void recalcularTiemposProductos(int *productosFTiempo, int (*tiemposPiezas)[MAX_PIEZAS_FIJO], int totalProductos, int maxPiezas) {
     for (int i = 0; i < totalProductos; i++) {
         int suma = 0;
-        for (int j = 0; j < MAX_PIEZAS; j++) {
+        for (int j = 0; j < maxPiezas; j++) {
             suma += tiemposPiezas[i][j];
         }
         productosFTiempo[i] = suma;
@@ -179,33 +179,197 @@ void mostrarTiempo(int minutosTotales) {
 }
 
 void mostrarTablaProductosPiezas(
-    int producto, 
-    char productos[MAX_PRODUCTO][MAX_NOMBRE],
-    int stockProductos[MAX_PRODUCTO], 
-    int totalProductos, 
-    int productosFTiempo[MAX_PRODUCTO], 
-    int piezasNecesarias[MAX_PRODUCTO][MAX_PIEZAS], 
-    char piezasProductos[MAX_PRODUCTO][MAX_PIEZAS][MAX_NOMBRE],
-    int stockPiezas[MAX_PRODUCTO][MAX_PIEZAS],
-    int tiemposPiezas[MAX_PRODUCTO][MAX_PIEZAS]
+    int producto,
+    char (*productos)[MAX_NOMBRE],
+    int *stockProductos,
+    int totalProductos,
+    int *productosFTiempo,
+    int (*piezasNecesarias)[MAX_PIEZAS_FIJO],
+    char (*piezasProductos)[MAX_PIEZAS_FIJO][MAX_NOMBRE],
+    int (*stockPiezas)[MAX_PIEZAS_FIJO],
+    int (*tiemposPiezas)[MAX_PIEZAS_FIJO],
+    char (*identificadoresUsados)[MAX_PIEZAS_FIJO][MAX_NOMBRE],
+    int maxPiezas
     ) {
-
+    printf("\n+--------------------------------------------------------------------------------------------+\n");
     printf("Producto seleccionado: %s\n", productos[producto]);
     printf("Stock actual de unidades terminadas: %d\n", stockProductos[producto]);
     printf("Tiempo de fabricacion promedio: %d minutos\n", productosFTiempo[producto]);
-
-    printf("+----------+-------------------------+---------+-------------------------+\n");
-    printf("| Cantidad | Nombre                  |  Stock  |  Tiempo de Instalacion  |\n");
-    printf("+----------+-------------------------+---------+-------------------------+\n");
-    for (int j = 0; j < MAX_PIEZAS; j++) {
+    printf("+----------+-------------------------+-------------------+---------+-------------------------+\n");
+    printf("| Cantidad | Nombre                  | Identificador     |  Stock  |  Tiempo de Instalacion  |\n");
+    printf("+----------+-------------------------+-------------------+---------+-------------------------+\n");
+    for (int j = 0; j < maxPiezas; j++) {
         if (strlen(piezasProductos[producto][j]) != 0) {
-            printf("| %8d | %-23s | %-7d | %19d min |\n",
-            piezasNecesarias[producto][j],
-            piezasProductos[producto][j],
-            stockPiezas[producto][j],
-            tiemposPiezas[producto][j]
+            printf("| %8d | %-23s | %-17s | %-7d | %19d min |\n",
+                piezasNecesarias[producto][j],
+                piezasProductos[producto][j],
+                identificadoresUsados[producto][j],
+                stockPiezas[producto][j],
+                tiemposPiezas[producto][j]
             );
         }
     }
-    printf("+----------+-------------------------+---------+-------------------------+\n");
+    printf("+----------+-------------------------+-------------------+---------+-------------------------+\n");
+}
+
+void generarIdentificador(
+    char* nombreProducto,
+    char* nombrePieza,
+    int cantidadPiezas,
+    char identificadores[MAX_PIEZAS_FIJO][MAX_NOMBRE],
+    char* identificadorGenerado
+) {
+    char base[10];
+    int len = 0;
+
+    base[len++] = nombreProducto[0];
+    base[len++] = nombrePieza[0];
+    base[len++] = nombrePieza[1];
+
+    int tempCantidad = cantidadPiezas;
+    char cantidadStr[6];
+    int cantidadLen = 0;
+    if (tempCantidad == 0) {
+        cantidadStr[cantidadLen++] = '0';
+    } else {
+        int temp = tempCantidad, digits = 0;
+        while (temp > 0) {
+            temp /= 10;
+            digits++;
+        }
+        cantidadLen = digits;
+        cantidadStr[digits] = '\0';
+        temp = tempCantidad;
+        while (digits > 0) {
+            cantidadStr[--digits] = (temp % 10) + '0';
+            temp /= 10;
+        }
+    }
+    for (int i = 0; i < cantidadLen; i++) {
+        base[len++] = cantidadStr[i];
+    }
+    base[len] = '\0';
+
+    int contador = 1;
+    int duplicado = 0;
+    char tempo[MAX_NOMBRE];
+
+    do {
+        int tempLen = 0;
+        for (tempLen = 0; base[tempLen] != '\0'; tempLen++) {
+            tempo[tempLen] = base[tempLen];
+        }
+        if (duplicado) {
+            int c = contador;
+            char numStri[6];
+            int numLen = 0;
+            if (c == 0) {
+                numStri[numLen++] = '0';
+            } else {
+                int t = c, d = 0;
+                while (t > 0) {
+                    t /= 10;
+                    d++;
+                }
+                numLen = d;
+                numStri[d] = '\0';
+                t = c;
+                while (d > 0) {
+                    numStri[--d] = (t % 10) + '0';
+                    t /= 10;
+                }
+            }
+            for (int i = 0; i < numLen; i++) {
+                tempo[tempLen++] = numStri[i];
+            }
+        }
+        tempo[tempLen] = '\0';
+
+        duplicado = 0;
+        for (int i = 0; i < cantidadPiezas; i++) {
+            if (strcmp(tempo, identificadores[i]) == 0) {
+                duplicado = 1;
+                contador++;
+                break;
+            }
+        }
+    } while (duplicado);
+
+    strcpy(identificadorGenerado, tempo);
+}
+
+int buscarPiezaPorIdentificador(int productoIndex, char (*piezas)[50], char *identificadorBuscado, int maxPiezas) {
+    int coincidencias[maxPiezas];
+    int count = 0;
+    int seleccion;
+
+    for (int i = 0; i < maxPiezas; i++) {
+        if (strlen(piezas[i]) > 0) {
+            int esPrefijo = 1;
+            const char *p1 = piezas[i];
+            const char *p2 = identificadorBuscado;
+            while (*p2) {
+                if (*p1 == '\0' || *p1 != *p2) {
+                    esPrefijo = 0;
+                    break;
+                }
+                p1++;
+                p2++;
+            }
+            if (esPrefijo) {
+                printf("%d. %s\n", count + 1, piezas[i]);
+                coincidencias[count++] = i;
+            }
+        }
+    }
+
+    if (count == 0) {
+        printf("No se encontraron coincidencias con ese prefijo.\n");
+        return -1;
+    }
+
+    if (count == 1) {
+        return coincidencias[0];
+    }
+
+    do {
+        leerEnteroNoNegativo("Seleccione el número del elemento (0 para cancelar): ", &seleccion);
+    } while (seleccion < 0 || seleccion > count);
+
+    if (seleccion == 0){
+        return -1;
+    }
+
+    return coincidencias[seleccion - 1];
+}
+
+void leerCadenaConEspacios(char* mensaje, char* destino, int max) {
+    int valido = 0;
+    while (!valido) {
+        printf("%s", mensaje);
+        if (fgets(destino, max, stdin) != 0) {
+            destino[strcspn(destino, "\n")] = '\0';
+
+            char* inicio = destino;
+            while (*inicio == ' ') {
+                inicio++;
+            }	
+
+            char* fin = destino + strlen(destino) - 1;
+            while (fin >= inicio && *fin == ' ') {
+                *fin = '\0';
+                fin--;
+            }
+
+            if (inicio != destino) {
+                int i = 0;
+                while (inicio[i]) {
+                    destino[i] = inicio[i];
+                    i++;
+                }
+                destino[i] = '\0';
+            }
+            valido = 1;
+        }
+    }
 }
