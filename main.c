@@ -54,6 +54,7 @@ int main() {
     int opcion;
     char USUARIO[MAX_NOMBRE] = "admin";
     char PASSWORD[MAX_NOMBRE] = "admin";
+    int LIMITE_MINUTOS = 5256000;
 
     int MAX_PRODUCTO = 20;
     int MAX_PIEZAS = 10;
@@ -797,12 +798,26 @@ int main() {
                         if (cantidadFabricar <= posiblesPorStock) {
                             printf("-> Fabricar %d unidades tomaria:\n", cantidadFabricar);
                             mostrarTiempo(tiempoTotal);
+                            // Límite de cantidad maxima (5256000)
+                            if (tiempoTotal > LIMITE_MINUTOS) {
+                                printf("El tiempo ingresado excede el limite maximo soportado de %d minutos   o", LIMITE_MINUTOS);
+                                mostrarTiempo(LIMITE_MINUTOS);
+                                tiempoTotal = LIMITE_MINUTOS;
+                                printf("Se usara el limite maximo permitido.\n");
+                            }
                         } else {
                             printf("-> No hay suficiente stock para fabricar %d unidades.\n", cantidadFabricar);
                             printf("-> Con el stock actual solo se pueden fabricar %d unidades.\n", posiblesPorStock);
                             int tiempoMaximo = posiblesPorStock * tiempoUnidad;
                             printf("-> Tiempo para fabricar %d unidades (maximo posible):\n", posiblesPorStock);
                             mostrarTiempo(tiempoMaximo);
+                            // Límite de cantidad maxima (5256000)
+                            if (tiempoTotal > LIMITE_MINUTOS) {
+                                printf("El tiempo ingresado excede el limite maximo soportado de %d minutos   o", LIMITE_MINUTOS);
+                                mostrarTiempo(LIMITE_MINUTOS);
+                                tiempoTotal = LIMITE_MINUTOS;
+                                printf("Se usara el limite maximo permitido.\n");
+                            }
 
                             printf("-> Faltan las siguientes piezas:\n");
                             for (int i = 0; i < MAX_PIEZAS; i++) {
@@ -888,12 +903,12 @@ int main() {
                                 break;
                         }
 
-                        // Límite de cantidad maxima (2147483647)
-                        int LIMITE_MINUTOS = 2147483647;
+                        // Límite de cantidad maxima (5256000)
                         if (minutosTotales > LIMITE_MINUTOS) {
-                            printf("El tiempo ingresado excede el limite maximo soportado (%d minutos).\n", LIMITE_MINUTOS);
+                            printf("El tiempo ingresado excede el limite maximo soportado de %d minutos   o", LIMITE_MINUTOS);
+                            mostrarTiempo(LIMITE_MINUTOS);
                             minutosTotales = LIMITE_MINUTOS;
-                            printf("Se usara el limite maximo permitido de 2147483647 minutos.\n");
+                            printf("Se usara el limite maximo permitido.\n");
                         }
 
                         int porTiempo = minutosTotales / tiempoUnidad;
@@ -1115,11 +1130,12 @@ int main() {
                     printf("1. Cambiar nombre de usuario\n");
                     printf("2. Cambiar contrasenia\n");
                     printf("3. Cambiar ambas\n");
+                    printf("4. Cambiar Limite de tiempo de fabricacion\n");
                     printf("0. Cancelar\n");
                     int credenciales;
                     leerEnteroNoNegativo("Seleccione una opcion: ", &credenciales);
-                    if (credenciales == 0 || credenciales > 3) {
-                        printf("Cambio de credenciales cancelado.\n");
+                    if (credenciales == 0 || credenciales > 4) {
+                        printf("Cambio de configuraciones cancelado.\n");
                         break;
                     }
                     switch (credenciales) {
@@ -1136,6 +1152,17 @@ int main() {
                             printf("Nombre de usuario cambiado a: %s\n", USUARIO);
                             leerCadena("Ingrese la nueva contrasenia: ", PASSWORD, MAX_NOMBRE);
                             printf("Contrasenia cambiada a: %s\n", PASSWORD);
+                            break;
+                        case 4:
+                            int nuevoLimite;
+                            leerEnteroPositivo("Ingrese el nuevo limite de tiempo de fabricacion (en minutos): ", &nuevoLimite);
+                            if (nuevoLimite > 525600) {
+                                printf("Limite cambiado a: %d minutos\n", nuevoLimite);
+                                LIMITE_MINUTOS = nuevoLimite;
+                                nuevoLimite = 0;
+                            } else {
+                                printf("Limite invalido. Debe ser mayor a 1 anio (525600 minutos).\n");
+                            }
                             break;
                     }
                     break;

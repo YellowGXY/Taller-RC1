@@ -129,12 +129,12 @@ void leerCaracter(char* mensaje, char* destino) {
                 *destino = ch;  
                 valido = 1;
             } else {
-                printf("Ingrese solo un caracter válido (sin espacios).\n");
+                printf("Ingrese solo un caracter valido (sin espacios).\n");
                 limpiarBuffer();
             }
         } else {
             limpiarBuffer();
-            printf("Ingrese solo un caracter válido (sin espacios).\n");
+            printf("Ingrese solo un caracter valido (sin espacios).\n");
         }
     }
 }
