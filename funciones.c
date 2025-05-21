@@ -195,107 +195,119 @@ void mostrarTablaProductosPiezas(
     printf("Producto seleccionado: %s\n", productos[producto]);
     printf("Stock actual de unidades terminadas: %d\n", stockProductos[producto]);
     printf("Tiempo de fabricacion promedio: %d minutos\n", productosFTiempo[producto]);
-    printf("+----------+-------------------------+-------------------+---------+-------------------------+\n");
-    printf("| Cantidad | Nombre                  | Identificador     |  Stock  |  Tiempo de Instalacion  |\n");
-    printf("+----------+-------------------------+-------------------+---------+-------------------------+\n");
+    printf("+-----------------+-------------------------+--------------------+---------+-------------------------+\n");
+    printf("| Identificador   | Nombre                  | Cantidad Necesaria |  Stock  |  Tiempo de Instalacion  |\n");
+    printf("+-----------------+-------------------------+--------------------+---------+-------------------------+\n");
     for (int j = 0; j < maxPiezas; j++) {
         if (strlen(piezasProductos[producto][j]) != 0) {
-            printf("| %8d | %-23s | %-17s | %-7d | %19d min |\n",
-                piezasNecesarias[producto][j],
-                piezasProductos[producto][j],
+            printf("| %-15s | %-23s | %-18d | %-7d | %19d min |\n",
                 identificadoresUsados[producto][j],
+                piezasProductos[producto][j],
+                piezasNecesarias[producto][j],
                 stockPiezas[producto][j],
                 tiemposPiezas[producto][j]
             );
         }
     }
-    printf("+----------+-------------------------+-------------------+---------+-------------------------+\n");
+    printf("+-----------------+-------------------------+--------------------+---------+-------------------------+\n");
 }
 
 void generarIdentificador(
     char* nombreProducto,
     char* nombrePieza,
     int cantidadPiezas,
-    char identificadores[MAX_PIEZAS_FIJO][MAX_NOMBRE],
+    char identificadoresGlobal[MAX_PRODUCTO_FIJO][MAX_PIEZAS_FIJO][MAX_NOMBRE],
+    int totalProductos,
     char* identificadorGenerado
 ) {
-    char base[10];
+    char base[20];
     int len = 0;
 
     base[len++] = nombreProducto[0];
-    base[len++] = nombrePieza[0];
-    base[len++] = nombrePieza[1];
 
-    int tempCantidad = cantidadPiezas;
-    char cantidadStr[6];
+    if (strlen(nombrePieza) >= 2) {
+        base[len++] = nombrePieza[0];
+        base[len++] = nombrePieza[1];
+    } else if (strlen(nombrePieza) == 1) {
+        base[len++] = nombrePieza[0];
+        base[len++] = 'X';
+    } else {
+        base[len++] = 'X';
+        base[len++] = 'X';
+    }
+
+    char cantidadStr[12];
+    int cantidad = cantidadPiezas;
     int cantidadLen = 0;
-    if (tempCantidad == 0) {
+    if (cantidad == 0) {
         cantidadStr[cantidadLen++] = '0';
     } else {
-        int temp = tempCantidad, digits = 0;
+        int temp = cantidad;
+        char rev[12];
+        int revLen = 0;
         while (temp > 0) {
+            rev[revLen++] = (temp % 10) + '0';
             temp /= 10;
-            digits++;
         }
-        cantidadLen = digits;
-        cantidadStr[digits] = '\0';
-        temp = tempCantidad;
-        while (digits > 0) {
-            cantidadStr[--digits] = (temp % 10) + '0';
-            temp /= 10;
+        for (int i = revLen - 1; i >= 0; i--) {
+            cantidadStr[cantidadLen++] = rev[i];
         }
     }
+    cantidadStr[cantidadLen] = '\0';
+
     for (int i = 0; i < cantidadLen; i++) {
         base[len++] = cantidadStr[i];
     }
     base[len] = '\0';
 
-    int contador = 1;
-    int duplicado = 0;
-    char tempo[MAX_NOMBRE];
+    int repetido = 1;
+    char tempID[MAX_NOMBRE];
 
-    do {
+    while (1) {
         int tempLen = 0;
-        for (tempLen = 0; base[tempLen] != '\0'; tempLen++) {
-            tempo[tempLen] = base[tempLen];
+        for (int i = 0; base[i] != '\0'; i++) {
+            tempID[tempLen++] = base[i];
         }
-        if (duplicado) {
-            int c = contador;
-            char numStri[6];
-            int numLen = 0;
-            if (c == 0) {
-                numStri[numLen++] = '0';
-            } else {
-                int t = c, d = 0;
-                while (t > 0) {
-                    t /= 10;
-                    d++;
-                }
-                numLen = d;
-                numStri[d] = '\0';
-                t = c;
-                while (d > 0) {
-                    numStri[--d] = (t % 10) + '0';
-                    t /= 10;
-                }
+        int rep = repetido;
+        char repStr[12];
+        int repLen = 0;
+        if (rep == 0) {
+            repStr[repLen++] = '0';
+        } else {
+            char revRep[12];
+            int revRepLen = 0;
+            while (rep > 0) {
+                revRep[revRepLen++] = (rep % 10) + '0';
+                rep /= 10;
             }
-            for (int i = 0; i < numLen; i++) {
-                tempo[tempLen++] = numStri[i];
+            for (int i = revRepLen - 1; i >= 0; i--) {
+                repStr[repLen++] = revRep[i];
             }
         }
-        tempo[tempLen] = '\0';
+        repStr[repLen] = '\0';
+        for (int i = 0; i < repLen; i++) {
+            tempID[tempLen++] = repStr[i];
+        }
+        tempID[tempLen] = '\0';
 
-        duplicado = 0;
-        for (int i = 0; i < cantidadPiezas; i++) {
-            if (strcmp(tempo, identificadores[i]) == 0) {
-                duplicado = 1;
-                contador++;
-                break;
+        int existe = 0;
+        for (int i = 0; i < totalProductos; i++) {
+            for (int j = 0; j < MAX_PIEZAS_FIJO; j++) {
+                if (strcmp(identificadoresGlobal[i][j], tempID) == 0) {
+                    existe = 1;
+                    break;
+                }
             }
+            if (existe) break;
         }
-    } while (duplicado);
 
-    strcpy(identificadorGenerado, tempo);
+        if (!existe) {
+            break;
+        }
+        repetido++;
+    }
+
+    strcpy(identificadorGenerado, tempID);
 }
 
 int buscarPiezaPorIdentificador(int productoIndex, char (*piezas)[50], char *identificadorBuscado, int maxPiezas) {
@@ -333,7 +345,7 @@ int buscarPiezaPorIdentificador(int productoIndex, char (*piezas)[50], char *ide
     }
 
     do {
-        leerEnteroNoNegativo("Seleccione el número del elemento (0 para cancelar): ", &seleccion);
+        leerEnteroNoNegativo("Seleccione el numero del elemento (0 para cancelar): ", &seleccion);
     } while (seleccion < 0 || seleccion > count);
 
     if (seleccion == 0){
@@ -371,5 +383,37 @@ void leerCadenaConEspacios(char* mensaje, char* destino, int max) {
             }
             valido = 1;
         }
+    }
+}
+
+int agregarIdentificadorProducto(char* nombreProducto, int numero) {
+    char identificador[15];
+    int len = 0;
+
+    identificador[len++] = ' ';
+    identificador[len++] = '-';
+    identificador[len++] = 'P';
+    identificador[len++] = 'r';
+    identificador[len++] = '#';
+
+    char numStr[5];
+    int n = numero;
+    numStr[0] = (n / 100) % 10 + '0';
+    numStr[1] = (n / 10) % 10 + '0';
+    numStr[2] = n % 10 + '0';
+    numStr[3] = '\0';
+
+    for (int i = 0; numStr[i] != '\0'; i++) {
+        identificador[len++] = numStr[i];
+    }
+
+    identificador[len] = '\0';
+
+    if (strlen(nombreProducto) + strlen(identificador) < MAX_NOMBRE) {
+        strcat(nombreProducto, identificador);
+        return 1;
+    } else {
+        printf("No se pudo agregar identificador al nombre del producto (demasiado largo).\n");
+        return 0;
     }
 }

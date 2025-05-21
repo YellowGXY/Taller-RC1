@@ -38,9 +38,11 @@ void generarIdentificador(
     char* nombreProducto,
     char* nombrePieza,
     int cantidadPiezas,
-    char identificadores[MAX_PIEZAS_FIJO][MAX_NOMBRE],
+    char identificadoresGlobal[MAX_PRODUCTO_FIJO][MAX_PIEZAS_FIJO][MAX_NOMBRE],
+    int totalProductos,
     char* identificadorGenerado
 );
+
 
 int buscarPiezaPorIdentificador(
     int productoIndex,
@@ -50,3 +52,4 @@ int buscarPiezaPorIdentificador(
 );
 
 void leerCadenaConEspacios(char* mensaje, char* destino, int max);
+int agregarIdentificadorProducto(char* nombreProducto, int numero);
