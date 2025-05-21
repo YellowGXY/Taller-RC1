@@ -934,7 +934,7 @@ int main() {
                     printf("0. Cancelar\n");
                     int credenciales;
                     leerEnteroNoNegativo("Seleccione una opcion: ", &credenciales);
-                    if (credenciales == 0 || credenciales > 2) {
+                    if (credenciales == 0 || credenciales > 3) {
                         printf("Cambio de credenciales cancelado.\n");
                         break;
                     }
