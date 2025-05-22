@@ -55,7 +55,7 @@ int main() {
     char USUARIO[MAX_NOMBRE] = "admin";
     char PASSWORD[MAX_NOMBRE] = "admin";
     int LIMITE_MINUTOS = 5256000;
-
+    int nuevoLimite = 0;
     int MAX_PRODUCTO = 20;
     int MAX_PIEZAS = 10;
 
@@ -1186,7 +1186,6 @@ int main() {
                             printf("Contrasenia cambiada a: %s\n", PASSWORD);
                             break;
                         case 4:
-                            int nuevoLimite;
                             leerEnteroPositivo("Ingrese el nuevo limite de tiempo de fabricacion (en minutos): ", &nuevoLimite); 
                             if (nuevoLimite > 525600) {
                                 printf("Limite cambiado a: %d minutos\n", nuevoLimite); // Cambia el límite
@@ -1194,6 +1193,7 @@ int main() {
                                 nuevoLimite = 0;
                             } else {
                                 printf("Limite invalido. Debe ser mayor a 1 anio (525600 minutos).\n");
+                                nuevoLimite = 0;
                             }
                             break;
                     }
