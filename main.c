@@ -1186,7 +1186,11 @@ int main() {
                             printf("Contrasenia cambiada a: %s\n", PASSWORD);
                             break;
                         case 4:
-                            leerEnteroPositivo("Ingrese el nuevo limite de tiempo de fabricacion (en minutos): ", &nuevoLimite); 
+                            leerEnteroNoNegativo("Ingrese el nuevo limite de tiempo de fabricacion (en minutos) 0 para cancelar: ", &nuevoLimite); 
+                            if (nuevoLimite == 0) {
+                                printf("Proceso cancelado");
+                                break;
+                            }
                             if (nuevoLimite > 525600) {
                                 printf("Limite cambiado a: %d minutos\n", nuevoLimite); // Cambia el límite
                                 LIMITE_MINUTOS = nuevoLimite; // Actualiza el límite
