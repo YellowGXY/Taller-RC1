@@ -583,6 +583,17 @@ int main() {
                         break;
                     }
 
+                    printf("Para continuar con la eliminación inicie sesión.\n");
+                    leerCadena("Nombre de usuario: ", usuario, MAX_NOMBRE);
+                    leerCadena("Contrasenia: ", pass, MAX_NOMBRE);
+                    if (strcmp(usuario, USUARIO) != 0 || strcmp(pass, PASSWORD) != 0) {
+                        printf("Credenciales incorrectas.\n");
+                        break;
+                    } else {
+                        printf("Credenciales correctas.\n");
+                        printf("\n");
+                    }
+
                     // Elimina el producto y reorganiza los arreglos
                     for (int i = producto; i < totalProductos - 1; i++) { // Desplaza los productos hacia una posición anterior
                         strcpy(productos[i], productos[i + 1]); // Copia el siguiente producto
